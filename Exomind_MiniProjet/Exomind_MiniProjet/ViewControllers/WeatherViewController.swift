@@ -136,10 +136,11 @@ class WeatherViewController: UIViewController {
     }
     
     private func updateUI() {
-        progressView.setProgress(Float(viewModel.weatherData.count) / 5, animated: true)
-        if viewModel.weatherData.count == 5 || viewModel.errorDescription.notNil() {
-            let alertTitle = viewModel.errorDescription.notNil() ? "Error" : "Success"
-            let alertMessage = viewModel.errorDescription ?? "Data downloaded"
+        let citiesCount = viewModel.cities.count
+        progressView.setProgress(Float(viewModel.weatherData.count) / Float(citiesCount), animated: true)
+        if citiesCount == viewModel.apiCallsCount {
+            let alertTitle = viewModel.errorDescription.isEmpty ? "Success" : "Error"
+            let alertMessage = viewModel.errorDescription.isEmpty ? "Data downloaded" : viewModel.errorDescription
             presentAlert(message: alertMessage, title: alertTitle) { _ in
                 self.showRestartButton()
             }

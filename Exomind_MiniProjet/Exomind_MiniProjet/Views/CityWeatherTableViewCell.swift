@@ -84,8 +84,6 @@ class CityWeatherTableViewCell: UITableViewCell {
         
         if let iconURL = URL(string: iconURL) {
             weatherIcon.load(url: iconURL)
-        } else {
-            weatherIcon.image = UIImage(systemName: "questionmark.square.dashed")
         }
         stackView.insertArrangedSubview(weatherIcon, at: 0)
     }
