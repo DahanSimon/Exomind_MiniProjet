@@ -63,7 +63,7 @@ class CityWeatherTableViewCell: UITableViewCell {
     init(style: UITableViewCell.CellStyle, reuseIdentifier: String?, iconURL: String) {
         self.iconURL = iconURL
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupViews()
+        setupView()
     }
     
     required init?(coder: NSCoder) {
@@ -72,7 +72,7 @@ class CityWeatherTableViewCell: UITableViewCell {
     
     // MARK: - Methods
     
-    private func setupViews() {
+    private func setupView() {
         addSubview(stackView)
         
         NSLayoutConstraint.activate([

@@ -13,13 +13,7 @@ class WeatherViewController: UIViewController {
     //MARK: - Variables
     
     private let viewModel = WeatherViewModel()
-    private var messageIndex = 0
-    private let messages = [
-        "Nous téléchargeons les données…",
-        "C’est presque fini…",
-        "Plus que quelques secondes avant d’avoir le résultat…"
-    ]
-    
+        
     //MARK: - Views
     
     private lazy var messageLabel: UILabel = {
@@ -90,6 +84,9 @@ class WeatherViewController: UIViewController {
                 self?.updateUI()
             }
         }
+        viewModel.updateMessage = {[weak self] message in
+            self?.setMessage(message)
+        }
         
         startFetchingWeatherData()
         startMessageRotation()
@@ -123,13 +120,7 @@ class WeatherViewController: UIViewController {
     }
     
     private func startMessageRotation() {
-        setMessage(messages[messageIndex])
-        
-        Timer.scheduledTimer(withTimeInterval: 6, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            self.messageIndex = (self.messageIndex + 1) % self.messages.count
-            self.setMessage(self.messages[self.messageIndex])
-        }
+        viewModel.startMessageRotation()
     }
     
     private func setMessage(_ message: String) {
@@ -141,7 +132,7 @@ class WeatherViewController: UIViewController {
         progressView.setProgress(Float(viewModel.weatherData.count) / Float(citiesCount), animated: true)
         if citiesCount == viewModel.apiCallsCount {
             let alertTitle = viewModel.errorDescription.isEmpty ? "Success" : "Error"
-            let alertMessage = viewModel.errorDescription.isEmpty ? "Data downloaded" : viewModel.errorDescription
+            let alertMessage = viewModel.errorDescription.isEmpty ? "Datas fully downloaded" : viewModel.errorDescription
             presentAlert(message: alertMessage, title: alertTitle) { _ in
                 self.showRestartButton()
             }
@@ -149,12 +140,26 @@ class WeatherViewController: UIViewController {
     }
     
     private func showRestartButton() {
-        progressView.isHidden = true
-        restartButton.isHidden = false
-        messageLabel.isHidden = true
-        tableView.isHidden = false
+        progressView.isHidden   = true
+        restartButton.isHidden  = false
+        messageLabel.isHidden   = true
+        tableView.isHidden      = false
         tableView.reloadData()
     }
+    
+    func reset() {
+        progressView.setProgress(0, animated: false)
+        
+        progressView.isHidden   = false
+        messageLabel.isHidden   = false
+        tableView.isHidden      = true
+        restartButton.isHidden  = true
+        
+        viewModel.reset()
+        tableView.reloadData()
+    }
+    
+    //MARK: - Actions
     
     @objc func restartButtonTapped() {
         reset()
@@ -162,17 +167,6 @@ class WeatherViewController: UIViewController {
         startMessageRotation()
     }
     
-    func reset() {
-        progressView.setProgress(0, animated: false)
-        
-        progressView.isHidden = false
-        messageLabel.isHidden = false
-        tableView.isHidden = true
-        restartButton.isHidden = true
-        
-        viewModel.reset()
-        tableView.reloadData()
-    }
 }
 
 extension WeatherViewController: UITableViewDataSource {

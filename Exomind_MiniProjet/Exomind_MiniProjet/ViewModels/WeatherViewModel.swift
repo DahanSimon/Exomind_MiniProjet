@@ -14,12 +14,21 @@ class WeatherViewModel {
     private(set) var weatherData: [CityWeather] = []
     var errorDescription: String = ""
     var apiCallsCount: Int = 0
+    private var messageIndex = 0
+    private let messages: [String]
+    
     
     var onUpdate: (() -> Void)?
+    var updateMessage: ((String) -> Void)?
     
-    init(cities: [String] = ["Rennes", "Paris", "Nantes", "Bordeaux", "Lyon"]) {
-        self.cities = cities
-    }
+    init(cities: [String] = ["Rennes", "Paris", "Nantes", "Bordeaux", "Lyon"],
+         messages: [String] = [
+            "Nous téléchargeons les données…",
+            "C’est presque fini…",
+            "Plus que quelques secondes avant d’avoir le résultat…"]) {
+                self.cities = cities
+                self.messages = messages
+            }
     
     func fetchWeatherData() {
         for (index, city) in cities.enumerated() {
@@ -43,5 +52,14 @@ class WeatherViewModel {
         weatherData = []
         apiCallsCount = 0
         errorDescription = ""
+    }
+    
+    func startMessageRotation() {
+        updateMessage?(messages[messageIndex])
+        Timer.scheduledTimer(withTimeInterval: 6, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            self.messageIndex = (self.messageIndex + 1) % self.messages.count
+            self.updateMessage?(self.messages[self.messageIndex])
+        }
     }
 }
