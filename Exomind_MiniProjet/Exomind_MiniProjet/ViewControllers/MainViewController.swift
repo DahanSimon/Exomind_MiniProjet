@@ -11,7 +11,7 @@ class MainViewController: UIViewController {
     
     //MARK: - Views
     
-    lazy var welcomeLabel: UILabel = {
+    private lazy var welcomeLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont(name: "system", size: 14.0)
@@ -20,7 +20,7 @@ class MainViewController: UIViewController {
         return label
     }()
     
-    lazy var startButton: UIButton = {
+    private lazy var startButton: UIButton = {
         var tintedConfiguration = UIButton.Configuration.tinted()
         tintedConfiguration.title = "Start"
         tintedConfiguration.image = UIImage(systemName: "play.fill")
@@ -31,13 +31,11 @@ class MainViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.heightAnchor.constraint(equalToConstant: 50.0).isActive = true
         button.widthAnchor.constraint(equalToConstant: 180.0).isActive = true
-        button.setTitle("Start", for: .normal)
-        button.setImage(UIImage(systemName: "play.fill"), for: .normal)
         button.addTarget(self, action: #selector(startButtonTapped), for: .touchUpInside)
         return button
     }()
     
-    lazy var stackView: UIStackView = {
+    private lazy var stackView: UIStackView = {
         let stackView = UIStackView()
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
@@ -63,6 +61,8 @@ class MainViewController: UIViewController {
         view.addSubview(stackView)
         
         NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
@@ -76,4 +76,3 @@ class MainViewController: UIViewController {
         navigationController?.pushViewController(weatherViewController, animated: true)
     }
 }
-
