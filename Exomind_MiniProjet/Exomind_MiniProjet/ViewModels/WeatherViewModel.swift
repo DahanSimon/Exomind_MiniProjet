@@ -7,6 +7,7 @@
 
 import Foundation
 
+//TODO: Test
 class WeatherViewModel {
     private let weatherService = WeatherService()
     let cities: [String]

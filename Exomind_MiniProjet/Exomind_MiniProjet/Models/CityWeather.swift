@@ -7,6 +7,7 @@
 
 import Foundation
 
+//TODO: Test
 // MARK: - CityWeather
 struct CityWeather: Codable {
     let weather: [Weather]

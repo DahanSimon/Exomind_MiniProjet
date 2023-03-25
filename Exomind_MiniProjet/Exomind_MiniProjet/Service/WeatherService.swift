@@ -1,6 +1,8 @@
 import Foundation
 
+//TODO: Mock for testing
 struct WeatherService {
+    //TODO: Save API key in .plist file
     let apiKey = "be119e6e4c0a0f05303ec9a30132499e"
     
     func fetchWeatherData(for city: String, completion: @escaping (Result<CityWeather, Error>) -> Void) {
@@ -25,7 +27,6 @@ private extension WeatherService {
     func createRequest(for url: URL) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.httpBody = "".data(using: .utf8)
         return request
     }
     

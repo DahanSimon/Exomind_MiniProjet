@@ -36,6 +36,7 @@ class WeatherViewController: UIViewController {
         let progressView = UIProgressView(progressViewStyle: .default)
         progressView.translatesAutoresizingMaskIntoConstraints = false
         progressView.progress = .zero
+        //TODO: Remove fixed constraints to improve responsiveness across devices
         progressView.widthAnchor.constraint(equalToConstant: 300.0).isActive = true
         progressView.heightAnchor.constraint(equalToConstant: 10.0).isActive = true
         progressView.layer.cornerRadius = 10.0

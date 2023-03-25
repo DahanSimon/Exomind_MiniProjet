@@ -16,7 +16,6 @@ class MainViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont(name: "system", size: 14.0)
         label.textColor = .black
-        label.text = "Welcome"
         return label
     }()
     
@@ -71,6 +70,7 @@ class MainViewController: UIViewController {
     }
     
     //MARK: - Actions
+    
     @objc func startButtonTapped() {
         let weatherViewController = WeatherViewController()
         navigationController?.pushViewController(weatherViewController, animated: true)
