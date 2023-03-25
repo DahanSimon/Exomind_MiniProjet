@@ -9,19 +9,183 @@ import Foundation
 import UIKit
 
 class WeatherViewController: UIViewController {
+    
+    //MARK: - Variables
+    
+    private let viewModel = WeatherViewModel()
+    private var messageIndex = 0
+    private let messages = [
+        "Nous téléchargeons les données…",
+        "C’est presque fini…",
+        "Plus que quelques secondes avant d’avoir le résultat…"
+    ]
+    
+    //MARK: - Views
+    
+    private lazy var messageLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont(name: "system", size: 14.0)
+        label.textColor = .black
+        label.numberOfLines = .zero
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private lazy var progressView: UIProgressView = {
+        let progressView = UIProgressView(progressViewStyle: .default)
+        progressView.translatesAutoresizingMaskIntoConstraints = false
+        progressView.progress = .zero
+        progressView.widthAnchor.constraint(equalToConstant: 300.0).isActive = true
+        progressView.heightAnchor.constraint(equalToConstant: 10.0).isActive = true
+        progressView.layer.cornerRadius = 10.0
+        return progressView
+    }()
+    
+    private lazy var stackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .vertical
+        stackView.addArrangedSubview(messageLabel)
+        stackView.addArrangedSubview(progressView)
+        stackView.addArrangedSubview(tableView)
+        stackView.addArrangedSubview(restartButton)
+        stackView.distribution = .fill
+        stackView.alignment = .center
+        stackView.spacing = 20.0
+        return stackView
+    }()
+    
+    private lazy var  tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.heightAnchor.constraint(equalToConstant: view.bounds.width).isActive = true
+        tableView.widthAnchor.constraint(equalToConstant: view.bounds.width * 0.8).isActive = true
+        return tableView
+    }()
+    
+    private lazy var restartButton: UIButton = {
+        var tintedConfiguration = UIButton.Configuration.tinted()
+        tintedConfiguration.title = "Restart"
+        tintedConfiguration.image = UIImage(systemName: "arrow.counterclockwise")
+        tintedConfiguration.imagePlacement = .trailing
+        tintedConfiguration.imagePadding = 5.0
+        
+        let button = UIButton(configuration: tintedConfiguration)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.heightAnchor.constraint(equalToConstant: 50.0).isActive = true
+        button.widthAnchor.constraint(equalToConstant: 180.0).isActive = true
+        button.addTarget(self, action: #selector(restartButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
     //MARK: - LifeCycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        // Do any additional setup after loading the view.
+        viewModel.onUpdate = { [weak self] in
+            DispatchQueue.main.async {
+                self?.updateUI()
+            }
+        }
+        
+        startFetchingWeatherData()
+        startMessageRotation()
     }
-
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        viewModel.reset()
+    }
+    
     //MARK: - Methods
     
     func setupView() {
-        view.backgroundColor = .red
+        view.backgroundColor = .white
+        view.addSubview(stackView)
         
-        NSLayoutConstraint.activate([])
+        tableView.isHidden = true
+        restartButton.isHidden = true
+        
+        tableView.dataSource = self
+        
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
+    
+    private func startFetchingWeatherData() {
+        viewModel.fetchWeatherData()
+    }
+    
+    private func startMessageRotation() {
+        setMessage(messages[messageIndex])
+        
+        Timer.scheduledTimer(withTimeInterval: 6, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            self.messageIndex = (self.messageIndex + 1) % self.messages.count
+            self.setMessage(self.messages[self.messageIndex])
+        }
+    }
+    
+    private func setMessage(_ message: String) {
+        messageLabel.text = message
+    }
+    
+    private func updateUI() {
+        progressView.setProgress(Float(viewModel.weatherData.count) / 5, animated: true)
+        if viewModel.weatherData.count == 5 || viewModel.errorDescription.notNil() {
+            let alertTitle = viewModel.errorDescription.notNil() ? "Error" : "Success"
+            let alertMessage = viewModel.errorDescription ?? "Data downloaded"
+            presentAlert(message: alertMessage, title: alertTitle) { _ in
+                self.showRestartButton()
+            }
+        }
+    }
+    
+    private func showRestartButton() {
+        progressView.isHidden = true
+        restartButton.isHidden = false
+        messageLabel.isHidden = true
+        tableView.isHidden = false
+        tableView.reloadData()
+    }
+    
+    @objc func restartButtonTapped() {
+        reset()
+        startFetchingWeatherData()
+        startMessageRotation()
+    }
+    
+    func reset() {
+        progressView.setProgress(0, animated: false)
+        
+        progressView.isHidden = false
+        messageLabel.isHidden = false
+        tableView.isHidden = true
+        restartButton.isHidden = true
+        
+        viewModel.reset()
+        tableView.reloadData()
+    }
+}
+
+extension WeatherViewController: UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return viewModel.weatherData.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let weather = viewModel.weatherData[indexPath.row]
+        let url = "https://openweathermap.org/img/w/\(weather.weather.first!.icon).png"
+        let cell = CityWeatherTableViewCell(style: .default, reuseIdentifier: "cityWeatherCell", iconURL: url)
+        cell.cityLabel.text = weather.name
+        cell.tempLabel.text = String(weather.main.temp.rounded()) + "°C"
+        
+        return cell
     }
 }
