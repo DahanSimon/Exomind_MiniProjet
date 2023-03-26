@@ -65,6 +65,7 @@ class WeatherViewController: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.heightAnchor.constraint(equalToConstant: view.bounds.width).isActive = true
         tableView.widthAnchor.constraint(equalToConstant: view.bounds.width * 0.8).isActive = true
+        tableView.isUserInteractionEnabled = false
         return tableView
     }()
     
@@ -129,8 +130,6 @@ class WeatherViewController: UIViewController {
             percentageLabel.centerYAnchor.constraint(equalTo: progressView.centerYAnchor),
             percentageLabel.trailingAnchor.constraint(equalTo: progressView.trailingAnchor, constant: -5.0)
         ])
-        
-        progressView.layer.cornerRadius = 5.0
     }
     
     private func startFetchingWeatherData() {
