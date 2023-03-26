@@ -7,7 +7,7 @@ struct WeatherService {
     
     func fetchWeatherData(for city: String, completion: @escaping (Result<CityWeather, Error>) -> Void) {
         guard let url = createURL(for: city) else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 400, userInfo: nil)))
+            completion(.failure(NSError(domain: "Unable to generate URL", code: 400, userInfo: nil)))
             return
         }
         
@@ -20,7 +20,10 @@ struct WeatherService {
 
 private extension WeatherService {
     func createURL(for city: String) -> URL? {
-        let query = "https://api.openweathermap.org/data/2.5/weather?q=\(city)&appid=\(apiKey)&units=metric&lang=fr"
+        guard let cityNameUrlFriendly = city.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
+            return nil
+        }
+        let query = "https://api.openweathermap.org/data/2.5/weather?q=\(cityNameUrlFriendly)&appid=\(apiKey)&units=metric&lang=fr"
         return URL(string: query)
     }
     

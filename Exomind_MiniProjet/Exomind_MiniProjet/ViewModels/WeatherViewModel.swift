@@ -13,19 +13,16 @@ class WeatherViewModel {
     let cities: [String]
     private(set) var weatherData: [CityWeather] = []
     var errorDescription: String = ""
-    var apiCallsCount: Int = 0
-    private var messageIndex = 0
+    var apiCallsCount: Int = .zero
+    private var messageIndex: Int = .zero
     private let messages: [String]
     
     
     var onUpdate: (() -> Void)?
     var updateMessage: ((String) -> Void)?
     
-    init(cities: [String] = ["Rennes", "Paris", "Nantes", "Bordeaux", "Lyon"],
-         messages: [String] = [
-            "Nous téléchargeons les données…",
-            "C’est presque fini…",
-            "Plus que quelques secondes avant d’avoir le résultat…"]) {
+    init(cities: [String],
+         messages: [String]) {
                 self.cities = cities
                 self.messages = messages
             }
@@ -50,7 +47,7 @@ class WeatherViewModel {
     
     func reset() {
         weatherData = []
-        apiCallsCount = 0
+        apiCallsCount = .zero
         errorDescription = ""
     }
     

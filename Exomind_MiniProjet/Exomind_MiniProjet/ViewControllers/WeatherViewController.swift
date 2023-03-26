@@ -12,8 +12,11 @@ class WeatherViewController: UIViewController {
     
     //MARK: - Variables
     
-    private let viewModel = WeatherViewModel()
-        
+    private let viewModel = WeatherViewModel(cities: ["Rennes", "Paris", "Nantes", "Bordeaux", "Lyon"],
+                                             messages: ["Nous téléchargeons les données…",
+                                                        "C’est presque fini…",
+                                                        "Plus que quelques secondes avant d’avoir le résultat…"])
+    
     //MARK: - Views
     
     private lazy var messageLabel: UILabel = {
@@ -30,11 +33,17 @@ class WeatherViewController: UIViewController {
         let progressView = UIProgressView(progressViewStyle: .default)
         progressView.translatesAutoresizingMaskIntoConstraints = false
         progressView.progress = .zero
-        //TODO: Remove fixed constraints to improve responsiveness across devices
-        progressView.widthAnchor.constraint(equalToConstant: 300.0).isActive = true
-        progressView.heightAnchor.constraint(equalToConstant: 10.0).isActive = true
         progressView.layer.cornerRadius = 10.0
         return progressView
+    }()
+    
+    private lazy var percentageLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont(name: "system", size: 14.0)
+        label.textAlignment = .right
+        label.text = "0%"
+        return label
     }()
     
     private lazy var stackView: UIStackView = {
@@ -101,6 +110,7 @@ class WeatherViewController: UIViewController {
     func setupView() {
         view.backgroundColor = .white
         view.addSubview(stackView)
+        progressView.addSubview(percentageLabel)
         
         tableView.isHidden = true
         restartButton.isHidden = true
@@ -111,8 +121,16 @@ class WeatherViewController: UIViewController {
             stackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
+            progressView.widthAnchor.constraint(equalToConstant: 300.0),
+            progressView.heightAnchor.constraint(equalToConstant: 30.0),
+            
+            percentageLabel.centerYAnchor.constraint(equalTo: progressView.centerYAnchor),
+            percentageLabel.trailingAnchor.constraint(equalTo: progressView.trailingAnchor, constant: -5.0)
         ])
+        
+        progressView.layer.cornerRadius = 5.0
     }
     
     private func startFetchingWeatherData() {
@@ -129,7 +147,10 @@ class WeatherViewController: UIViewController {
     
     private func updateUI() {
         let citiesCount = viewModel.cities.count
+        let percentage = (Float(viewModel.weatherData.count) / Float(citiesCount)) * 100
         progressView.setProgress(Float(viewModel.weatherData.count) / Float(citiesCount), animated: true)
+        //TODO: Remove unnecessary zero from percentage
+        percentageLabel.text = "\(String(format: "%.2f", percentage)) %"
         if citiesCount == viewModel.apiCallsCount {
             let alertTitle = viewModel.errorDescription.isEmpty ? "Success" : "Error"
             let alertMessage = viewModel.errorDescription.isEmpty ? "Datas fully downloaded" : viewModel.errorDescription

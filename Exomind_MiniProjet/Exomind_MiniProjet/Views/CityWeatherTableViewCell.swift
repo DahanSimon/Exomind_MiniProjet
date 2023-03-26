@@ -21,7 +21,7 @@ class CityWeatherTableViewCell: UITableViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont(name: "system", size: 14.0)
         label.textColor = .black
-        label.numberOfLines = 0
+        label.numberOfLines = .zero
         label.textAlignment = .center
         return label
     }()
@@ -31,7 +31,7 @@ class CityWeatherTableViewCell: UITableViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont(name: "system", size: 14.0)
         label.textColor = .black
-        label.numberOfLines = 0
+        label.numberOfLines = .zero
         label.textAlignment = .center
         return label
     }()
@@ -85,6 +85,6 @@ class CityWeatherTableViewCell: UITableViewCell {
         if let iconURL = URL(string: iconURL) {
             weatherIcon.load(url: iconURL)
         }
-        stackView.insertArrangedSubview(weatherIcon, at: 0)
+        stackView.insertArrangedSubview(weatherIcon, at: .zero)
     }
 }
